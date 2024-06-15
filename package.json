@@ -1,0 +1,26 @@
+{
+  "name": "PointQuest",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "prettier": "^3.2.5",
+    "tailwindcss": "^3.4.4",
+    "turbo": "latest",
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "npm@10.4.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
