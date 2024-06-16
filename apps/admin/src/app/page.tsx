@@ -223,6 +223,8 @@
 //   );
 // }
 
+
+
 export default function Home() {
-  return <div>Admin page</div>;
+  return <h1 className="text-4xl">Admin Home Page</h1>;
 }
