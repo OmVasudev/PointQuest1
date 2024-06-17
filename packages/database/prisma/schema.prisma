@@ -13,8 +13,67 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+model Student {
+	id String @id @default(uuid())
+	firstName String
+	lastName String
+	email String @unique
+	password String
+	phoneNo String
+	branch String
+	USN String @unique
+	points Int @default(0)
+	passingYear Int
+	activityName String
+	clubName String
+	date DateTime
+}
+
+model Admin {
+	id String @id @default(uuid())
+	firstName String
+	lastName String
+	email String @unique
+	password String
+	phoneNo String
+	branch String
+	USN String @unique
+}
+
+model BOD {
+	id String @id @default(uuid())
+	firstName String
+	lastName String
+	email String @unique
+	password String
+	phoneNo String
+	branch String
+	USN String @unique
+	clubId String
+	club Club @relation(fields:[clubId],references:[id],onDelete:Cascade)
+}
+
+model Club {
+	id String @id @default(uuid())
+	name String
+	description String
+	events Event[]
+	bod BOD[]
+	faculty String
+	president String
+	techLead String
+	image String
+}
+
+model Event {
+	id String @id @default(uuid())
+	name String
+	description String
+	contact String
+	link String
+	points Int
+	clubId String
+	club Club @relation(fields:[clubId],references:[id],onDelete:Cascade)
+	viewImage String
+	downloadImage String
 }
