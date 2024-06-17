@@ -17,7 +17,8 @@ import Link from "next/link";
 
 const FormSchema = z
   .object({
-    username: z.string().min(1, "Username is required").max(100),
+    first: z.string().min(1, "First Name is required").max(100),
+    last: z.string().min(1, "Last Name is required").max(100),
     email: z.string().min(1, "Email is required").email("Invalid Email"),
     password: z
       .string()
@@ -31,6 +32,7 @@ const FormSchema = z
       .regex(/^\d{10}$/, "Phone number must be exactly 10 digits"),
     branch: z.string().min(1, "Branch is required"),
     usn: z.string().min(1, "USN is required"),
+    clubs: z.string().min(1, "Club selection is required"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
@@ -52,17 +54,32 @@ const SignUpForm = () => {
         <div className="space-y-2">
           <FormField
             control={form.control}
-            name="username"
+            name="first"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Username</FormLabel>
+                <FormLabel>First Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="John Doe" {...field} />
+                  <Input placeholder="John " {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="last"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Last Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Doe" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="email"
@@ -111,6 +128,25 @@ const SignUpForm = () => {
                 <FormLabel>USN</FormLabel>
                 <FormControl>
                   <Input placeholder="Enter your USN" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="clubs"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Clubs</FormLabel>
+                <FormControl>
+                  <select {...field} className="w-full p-2 border rounded">
+                    <option value="">Select a club</option>
+                    <option value="Rotaract">Rotaract</option>
+                    <option value="Quiz">Quiz</option>
+                    <option value="Photography">Photography</option>
+                  </select>
                 </FormControl>
                 <FormMessage />
               </FormItem>
