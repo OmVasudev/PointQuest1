@@ -7,4 +7,10 @@ module.exports = {
     project: true,
   },
   ignorePatterns: ["next.config.mjs"],
+  env: {
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+  },
+  rules: {
+    "turbo/no-undeclared-env-vars": "off",
+  },
 };

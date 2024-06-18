@@ -1,6 +1,30 @@
 import { NextResponse } from "next/server";
 import { db } from "@repo/db";
 import { hash } from "bcrypt";
+import * as z from "zod";
+
+const studentSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Invalid email"),
+  password: z
+    .string()
+    .min(1, "Password is required")
+    .min(8, "Password must have 8 characters"),
+  firstName: z.string().min(1, "First Name is required"),
+  lastName: z.string().min(1, "Last Name is required"),
+  phoneNo: z
+    .string()
+    .min(1, "Phone number is required")
+    .length(10, "Phone number must be exactly 10 digits"),
+  branch: z.string().min(1, "Branch is required"),
+  USN: z
+    .string()
+    .min(1, "Usn is required")
+    .length(10, "USN must be exactly 10 characters"),
+  passingYear: z
+    .string()
+    .min(4, "Year must be exactly 4")
+    .max(4, "Year must be exactly 4"),
+});
 
 export async function POST(req: Request) {
   try {
@@ -15,7 +39,7 @@ export async function POST(req: Request) {
       branch,
       USN,
       passingYear,
-    } = body;
+    } = studentSchema.parse(body);
 
     //check if email already exists
     const existingUserByEmail = await db.student.findUnique({

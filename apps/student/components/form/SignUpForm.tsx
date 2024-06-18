@@ -14,6 +14,8 @@ import {
 import { Button } from "../../@/components/ui/button";
 import { Input } from "../../@/components/ui/input";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useToast } from "../../@/components/ui/use-toast";
 
 const FormSchema = z
   .object({
@@ -29,11 +31,11 @@ const FormSchema = z
       .min(1, "Phone number is required")
       .length(10, "Phone number must be exactly 10 digits"),
     branch: z.string().min(1, "Branch is required"),
-    usn: z
+    USN: z
       .string()
       .min(1, "Usn is required")
       .length(10, "USN must be exactly 10 characters"),
-    year: z
+    passingYear: z
       .string()
       .min(4, "Year must be exactly 4")
       .max(4, "Year must be exactly 4"),
@@ -45,6 +47,8 @@ const FormSchema = z
   });
 
 const SignUpForm = () => {
+  const router = useRouter();
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -53,16 +57,42 @@ const SignUpForm = () => {
       email: "",
       phoneNo: "",
       branch: "",
-      usn: "",
-      year: "",
+      USN: "",
+      passingYear: "",
       password: "",
       confirmPassword: "",
     },
   });
 
-  const onSubmit = (values: z.infer<typeof FormSchema>) => {
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof FormSchema>) => {
+    const response = await fetch("/api/user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        phoneNo: values.phoneNo,
+        branch: values.branch,
+        USN: values.USN,
+        passingYear: values.passingYear,
+        password: values.password,
+      }),
+    });
+
+    if (response.ok) {
+      router.push("/sign-in");
+    } else {
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+    }
   };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
@@ -134,7 +164,7 @@ const SignUpForm = () => {
           />
           <FormField
             control={form.control}
-            name="usn"
+            name="USN"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>USN</FormLabel>
@@ -147,7 +177,7 @@ const SignUpForm = () => {
           />
           <FormField
             control={form.control}
-            name="year"
+            name="passingYear"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Year of passing</FormLabel>
