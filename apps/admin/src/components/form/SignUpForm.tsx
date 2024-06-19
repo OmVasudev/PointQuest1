@@ -9,28 +9,33 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { z } from "zod";
+import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast";
 
 const FormSchema = z
   .object({
-    username: z.string().min(1, "Username is required").max(100),
-    email: z.string().min(1, "Email is required").email("Invalid Email"),
+    email: z.string().min(1, "Email is required").email("Invalid email"),
     password: z
       .string()
       .min(1, "Password is required")
-      .min(8, "Password must have more than 8 characters"),
-    confirmPassword: z.string().min(1, "Password confirmation is required"),
-    phone: z
+      .min(8, "Password must have 8 characters"),
+    firstName: z.string().min(1, "First Name is required"),
+    lastName: z.string().min(1, "Last Name is required"),
+    phoneNo: z
       .string()
-      .min(10, "Phone number must be exactly 10 digits")
-      .max(10, "Phone number must be exactly 10 digits")
-      .regex(/^\d{10}$/, "Phone number must be exactly 10 digits"),
+      .min(1, "Phone number is required")
+      .length(10, "Phone number must be exactly 10 digits"),
     branch: z.string().min(1, "Branch is required"),
-    usn: z.string().min(1, "USN is required"),
+    USN: z
+      .string()
+      .min(1, "Usn is required")
+      .length(10, "USN must be exactly 10 characters"),
+    confirmPassword: z.string().min(1, "Password confirmation is required"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
@@ -38,12 +43,38 @@ const FormSchema = z
   });
 
 const SignUpForm = () => {
+  const router = useRouter();
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
 
-  const onSubmit = (values: z.infer<typeof FormSchema>) => {
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof FormSchema>) => {
+    const response = await fetch("api/user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        phoneNo: values.phoneNo,
+        branch: values.branch,
+        USN: values.USN,
+        password: values.password,
+      }),
+    });
+
+    if (response.ok) {
+      router.push("/sign-in");
+    } else {
+      toast({
+        title: "Error",
+        description: "Opps! something went wrong",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -52,12 +83,25 @@ const SignUpForm = () => {
         <div className="space-y-2">
           <FormField
             control={form.control}
-            name="username"
+            name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Username</FormLabel>
+                <FormLabel>First Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="John Doe" {...field} />
+                  <Input placeholder="John" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="lastName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Last Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Doe" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -79,7 +123,7 @@ const SignUpForm = () => {
 
           <FormField
             control={form.control}
-            name="phone"
+            name="phoneNo"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Phone Number</FormLabel>
@@ -105,7 +149,7 @@ const SignUpForm = () => {
           />
           <FormField
             control={form.control}
-            name="usn"
+            name="USN"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>USN</FormLabel>

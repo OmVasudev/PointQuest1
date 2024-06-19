@@ -14,6 +14,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast";
 
 const FormSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid Email"),
@@ -24,12 +27,27 @@ const FormSchema = z.object({
 });
 
 const SignInForm = () => {
+  const router = useRouter();
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
 
-  const onSubmit = (values: z.infer<typeof FormSchema>) => {
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof FormSchema>) => {
+    const signInData = await signIn("credentials", {
+      email: values.email,
+      password: values.password,
+    });
+    if (signInData?.error) {
+      toast({
+        title: "Error",
+        description: "Opps! something went wrong",
+        variant: "destructive",
+      });
+    } else {
+      router.refresh();
+      router.push("/viewClub");
+    }
   };
 
   return (
@@ -43,10 +61,7 @@ const SignInForm = () => {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="mail@example.com"
-                    {...field}
-                  />
+                  <Input placeholder="mail@example.com" {...field} />
                 </FormControl>
 
                 <FormMessage />
@@ -61,7 +76,11 @@ const SignInForm = () => {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input type='password' placeholder="Enter you Password" {...field} />
+                  <Input
+                    type="password"
+                    placeholder="Enter you Password"
+                    {...field}
+                  />
                 </FormControl>
 
                 <FormMessage />
