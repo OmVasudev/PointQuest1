@@ -16,6 +16,7 @@
     "@radix-ui/react-toast": "^1.1.5",
     "@repo/db": "*",
     "@repo/ui": "*",
+    "axios": "^1.7.2",
     "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",

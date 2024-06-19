@@ -14,25 +14,27 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const FormSchema = z
   .object({
-    first: z.string().min(1, "First Name is required").max(100),
-    last: z.string().min(1, "Last Name is required").max(100),
+    firstName: z.string().min(1, "First Name is required").max(100),
+    lastName: z.string().min(1, "Last Name is required").max(100),
     email: z.string().min(1, "Email is required").email("Invalid Email"),
     password: z
       .string()
       .min(1, "Password is required")
       .min(8, "Password must have more than 8 characters"),
     confirmPassword: z.string().min(1, "Password confirmation is required"),
-    phone: z
+    phoneNo: z
       .string()
-      .min(10, "Phone number must be exactly 10 digits")
-      .max(10, "Phone number must be exactly 10 digits")
-      .regex(/^\d{10}$/, "Phone number must be exactly 10 digits"),
+      .min(1, "Phone number is required")
+      .length(10, "Phone number must be exactly 10 digits"),
     branch: z.string().min(1, "Branch is required"),
-    usn: z.string().min(1, "USN is required"),
-    clubs: z.string().min(1, "Club selection is required"),
+    USN: z.string().min(1, "USN is required"),
+    clubId: z.string().min(1, "Club selection is required"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
@@ -40,12 +42,43 @@ const FormSchema = z
   });
 
 const SignUpForm = () => {
+  const router = useRouter();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
 
-  const onSubmit = (values: z.infer<typeof FormSchema>) => {
-    console.log(values);
+  const [clubs, setClubs] = useState([]);
+
+  useEffect(() => {
+    const fetchClubs = async () => {
+      try {
+        const response = await axios.get("/api/clubs");
+        console.log(response.data); // Log the response data
+        setClubs(response.data);
+      } catch (error) {
+        console.error("Error fetching clubs", error);
+      }
+    };
+
+    fetchClubs();
+  }, []);
+
+  const onSubmit = async (values: z.infer<typeof FormSchema>) => {
+    const selectedClub = clubs.find((club) => club.id === values.clubId);
+    console.log(selectedClub); // Log selected club
+    const submissionData = {
+      ...values,
+      // clubName: selectedClub?.name,
+    };
+    console.log(submissionData); // Log submission data
+
+    try {
+      await axios.post("/api/bod", submissionData);
+      alert("BOD created successfully");
+      router.push("/viewClub");
+    } catch (error) {
+      console.error("Error submitting form", error);
+    }
   };
 
   return (
@@ -54,7 +87,7 @@ const SignUpForm = () => {
         <div className="space-y-2">
           <FormField
             control={form.control}
-            name="first"
+            name="firstName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>First Name</FormLabel>
@@ -68,7 +101,7 @@ const SignUpForm = () => {
 
           <FormField
             control={form.control}
-            name="last"
+            name="lastName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Last Name</FormLabel>
@@ -96,7 +129,7 @@ const SignUpForm = () => {
 
           <FormField
             control={form.control}
-            name="phone"
+            name="phoneNo"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Phone Number</FormLabel>
@@ -122,7 +155,7 @@ const SignUpForm = () => {
           />
           <FormField
             control={form.control}
-            name="usn"
+            name="USN"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>USN</FormLabel>
@@ -136,16 +169,18 @@ const SignUpForm = () => {
 
           <FormField
             control={form.control}
-            name="clubs"
+            name="clubId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Clubs</FormLabel>
+                <FormLabel>Club</FormLabel>
                 <FormControl>
                   <select {...field} className="w-full p-2 border rounded">
                     <option value="">Select a club</option>
-                    <option value="Rotaract">Rotaract</option>
-                    <option value="Quiz">Quiz</option>
-                    <option value="Photography">Photography</option>
+                    {clubs.map((club) => (
+                      <option key={club.id} value={club.id}>
+                        {club.name}
+                      </option>
+                    ))}
                   </select>
                 </FormControl>
                 <FormMessage />
