@@ -39,15 +39,16 @@ const SignInForm = () => {
       password: values.password,
       redirect: false,
     });
+
     if (signInData?.error) {
       toast({
         title: "Error",
-        description: "Opps! something went wrong",
+        description: "Oops! something went wrong",
         variant: "destructive",
       });
     } else {
       router.refresh();
-      router.push("/viewClub");
+      router.push("/view-event");
     }
   };
 

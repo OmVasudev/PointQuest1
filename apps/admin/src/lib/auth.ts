@@ -22,39 +22,51 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.error("Missing credentials");
           return null;
         }
 
-        const existingAdmin = await db.admin.findUnique({
-          where: {
-            email: credentials?.email,
-          },
-        });
+        try {
+          const existingAdmin = await db.admin.findUnique({
+            where: {
+              email: credentials.email,
+            },
+          });
 
-        if (!existingAdmin) {
+          if (!existingAdmin) {
+            console.error("Admin not found");
+            return null;
+          }
+
+          const passwordMatch = await compare(
+            credentials.password,
+            existingAdmin.password
+          );
+
+          if (!passwordMatch) {
+            console.error("Password does not match");
+            return null;
+          }
+
+          console.log("Authorization successful for:", existingAdmin.email);
+          return {
+            id: existingAdmin.id,
+            firstName: existingAdmin.firstName,
+            lastName: existingAdmin.lastName,
+            email: existingAdmin.email,
+          };
+        } catch (error) {
+          console.error("Authorization error:", error);
           return null;
         }
-
-        const passwordMatch = await compare(
-          credentials.password,
-          existingAdmin.password
-        );
-
-        if (!passwordMatch) {
-          return null;
-        }
-
-        return {
-          id: existingAdmin.id,
-          firstName: existingAdmin.firstName,
-          lastName: existingAdmin.lastName,
-          email: existingAdmin.email,
-        };
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user }) {
+      console.log("JWT callback - token:", token);
+      console.log("JWT callback - user:", user);
+
       if (user) {
         return {
           ...token,
@@ -64,6 +76,9 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
+      console.log("Session callback - session:", session);
+      console.log("Session callback - token:", token);
+
       return {
         ...session,
         user: {

@@ -22,10 +22,8 @@ export async function POST(req: Request) {
     const body = await req.json();
     const formData = BODSchema.parse(body);
 
-    // Hash the password before saving to the database
     const hashedPassword = await hash(formData.password, 10);
 
-    // Create BOD record in the database
     const newBOD = await db.bOD.create({
       data: {
         firstName: formData.firstName,

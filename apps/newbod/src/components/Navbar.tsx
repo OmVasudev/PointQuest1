@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { buttonVariants } from "./ui/button";
 import { Trophy } from "lucide-react";
-import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
-import UserAccountNav from "@/components/UserAccountNav";
+import { authOptions } from "@/lib/auth";
+import UserAccountNav from "../components/UserAccountNav";
 
 const Navbar = async () => {
   const session = await getServerSession(authOptions);
