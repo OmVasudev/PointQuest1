@@ -28,6 +28,8 @@ model Student {
 	activityName String?
 	clubName String?
 	date DateTime?
+
+	participants Participation[]
 }
 
 model Admin {
@@ -77,4 +79,14 @@ model Event {
 	club Club @relation(fields:[clubId],references:[id],onDelete:Cascade)
 	viewImage String
 	downloadImage String
+
+	participants Participation[]
+}
+
+model Participation{
+	id String @id @default(uuid())
+	eventId String
+	studentId String
+	event Event @relation(fields:[eventId],references:[id],onDelete:Cascade)
+	student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
